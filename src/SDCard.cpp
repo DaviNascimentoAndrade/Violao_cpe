@@ -50,7 +50,7 @@ void SDCard::printPosition(std::string pFileName)
 
 string SDCard::readFile(int pNumFile, char pNumStroke)
 {
-  File text = SD.open("/musicas");
+  File text = SD.open("/musicas"); // @brief Variável que contem a pasta musicas
   string verify = "";
   string file = "";
   int goBack = 0;

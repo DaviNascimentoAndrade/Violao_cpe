@@ -3,7 +3,7 @@
 
 /**
  * @file EngineSet.hpp
- * @brief Store all the Engines and control them to play a music.
+ * @brief Armazena todas as Engines e controla elas pra tocar música.
  * @version 1.0
  * @date 2023-07-28
  * @details This archive contains the class 'EngineSet', used to create the magic guitar.
@@ -25,7 +25,7 @@ class EnginesSet
 public:
 
     /**
-    * @brief Enum of Engine directions.
+    * @brief Enumerador de direções da engine, UP = 1, DOWN = 0.
     */
     enum mDirection
     {
@@ -34,19 +34,19 @@ public:
     };
 
     /**
-    * @brief Contructor of an EnginesSet.
+    * @brief Construtor do EnginesSet.
     */
     EnginesSet();
 
     /**
-     * @brief Destructor of EnginesSet
-     * Just deletes the previously allocated engines
+     * @brief Destrutor do EnginesSet
+     * Apenas deleta as engines alocadas anteriormente.
      */
     ~EnginesSet();
 
     /**
-    * @brief Inserts an Engine to the EnginesSet.
-    * @param pGuitarString Guitar string of the Engine.
+    * @brief Adiciona uma Engine ao EnginesSet.
+    * @param pGuitarString Qual corda a Engine toca.
     * @param pStep STEP pin of the Engine.
     * @param pDir DIR pin of the Engine.
     */
@@ -55,89 +55,89 @@ public:
     // void boot(); // Lógica de fim de curso
 
     /**
-    * @brief Add an Engine to mEnginesToPlay according the music.
-    * @param pGuitarString Guitar string of the Engine.
+    * @brief Adiciona um Engine a mEnginesToPlay de acordo com a música.
+    * @param pGuitarString Qual corda a Engine toca.
     */
-    void addToenginesToPlay(std::string pGuitarString); // adiciona os motores que irão girar de acordo com a corda presente na música
+    void addToenginesToPlay(std::string pGuitarString); 
 
     /**
-    * @brief Spin the Engines on mEnginesToPlay.
+    * @brief Roda os Engines em mEnginesToPlay.
     */
-    void playMany(); // roda o motor antes adicionado
+    void playMany();
 
     /**
-    * @brief Play a music.
+    * @brief Toca uma música
     * @param pStream Music stream.
     * @param pTune Music tune.
     */
-    void parseFile(std::string pStream, int pTune); // toca a música
+    void parseFile(std::string pStream, int pTune);
 
     /**
-    * @brief Set all the Engines up or down.
+    * @brief Faz todos os Engines subirem ou descerem
     * @param pDirection Engine current direction.
     * @param pGuitarStrings Guitar strings that will be played.
     */
-    void runThrough(mDirection pDirection, std::string pGuitarStrings); // faz subida ou descida em todos os motores
+    void runThrough(mDirection pDirection, std::string pGuitarStrings);
 
     void tune(int pTunePosition);
 
     /**
-    * @brief Reset an Engine.
-    * @param pGuitarReset Engine position in mEngines.
+    * @brief Reseta um Engine fazendo ele mover um passo.
+    * @param pGuitarReset Posição do Engine em mEngines.
     * @param pSignal Direction to reset the Engine (up or down).
     */
-    void playOneStep(int pGuitarReset, int pSignal); // reseta o motor selecionado
+    void playOneStep(int pGuitarReset, int pSignal);
 
     /**
-    * @brief Save the Engines' position on the SD card.
+    * @brief Salva a posição do Engine no cartão SD
     * @param pSD SD Card.
     */
     void getEnginePos(SDCard pSd);
 
     /**
-    * @brief Sets the opposition after a music.
+    * @brief Configura oposição após cada música.
     */
-    void endMusic(); //Configura oposição após cada música
+    void endMusic();
 
     /**
-    * @brief Set the Engines speed.
+    * @brief Configura a velocidade dos engines.
     * @param pSD SD Card.
     */
-    void setEngineSpeed(SDCard pSd); // configura velocidade a cada motor
+    void setEngineSpeed(SDCard pSd);
 
     /**
-    * @brief Set a compass suddivision.
+    * @brief Configura o número de subdivisões de um compasso.
     * @param pSD SD Card.
     */
-    void setSubdivision(SDCard pSd); //determina o número de subdivisões de um compasso
+    void setSubdivision(SDCard pSd);
 
     /**
-    * @brief Set the delay between pulses.
+    * @brief Configura o delay entre pulsos
     * @param pSD SD Card.
     */
-    void setDelay(); //determina e retorna o delay entre um pulso e outro
+    void setDelay();
 
     /**
-    * @brief Set the mLastMillis variable to current reading of millis()
+    * @brief Configura a variável mLastMillis para a última leitura de millis()
     */
     void setLastMillis();
   
     /**
-     * @brief Plays each string one time with a .5 second delay twice
-     * Used before a music starts so that the player can move his hand and to align the picks
+     * @brief Toca cada corda com delay de .5 segundos 2 vezes
+     * Usado antes de cada música para o usuário mover a mão e para alinhar as paletas
      */
     void standardBeat();
 
     void setCurrentTarget(String pcurrentTargets);
 
     /**
-    * @brief Spin a Engine a half of his target.
+    * @brief Gira um Engine para metade da posição alvo.
     * @param pGuitarStringReset Engine position in mEngines.
     */
     void runHalfTarget(int pGuitarStringReset);
 
     /**
-    * @brief Vector of Engine positions.
+    * @brief Vetor de posições de Engines
     */
     std::vector<int> mEnginePos;
 
@@ -148,7 +148,7 @@ private:
     std::vector<Engine *> mEngines;
 
     /**
-    * @brief Vector of Engines to play a music.
+    * @brief Vector of Engines que vão tocar a música
     */
     std::vector<Engine *> mEnginesToPlay;
 
