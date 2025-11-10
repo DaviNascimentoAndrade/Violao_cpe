@@ -19,52 +19,52 @@ class Engine
 public:
     
     /**
-    * @brief Contructor of an Engine.
-    * @param pGuitarString Guitar string of the Engine.
-    * @param pStep STEP pin of the Engine.
-    * @param pDir DIR pin of the Engine.
+    * @brief Construtor de uma Engine.
+    * @param pGuitarString Corda que a Engine toca.
+    * @param pStep Pino STEP da Engine.
+    * @param pDir Pino DIR da Engine.
     */
     Engine(char pGuitarString, int pStep, int pDir);
 
     /**
-    * @brief Return the Engine guitar string.
+    * @brief Retorna a corda que o Engine toca.
     */
     char getGuitarString();
 
     /**
-    * @brief Return the Engine target.
+    * @brief Retorna o alvo do Engine
     */
     int getTarget();
 
     /**
-    * @brief Return the Engine DIR pin.
+    * @brief Retorna o pino DIR do Engine.
     */
     int getDir();
 
     /**
-    * @brief Return the Engine STEP pin.
+    * @brief Retorna o pino STEP do engine.
     */
     int getStep();
 
     /**
-    * @brief Reverse the engine target.
+    * @brief Inverte o alvo do Engine.
     */
     void reverseTarget();
 
     /**
-    * @brief Return the Engine position.
+    * @brief Retorna a posição do Engine.
     */
     int getPosition();
 
     /**
-    * @brief Return the position pointer.
+    * @brief Retorna o ponteiro de posição
     */
     int *getPosPtr();
 
     /**
-    * @brief Spin the engine one step - used for reset it.
+    * @brief Gira o Engine um passo - usado para resetar
     */
-    void oneStep(int pSignal); // utilizado para resetar o motor
+    void oneStep(int pSignal);
 
     /**
     * @brief Set the Engine speed.
@@ -73,13 +73,13 @@ public:
     void setSpeed(int pSDSpeed); // utilizado para determinar o valor da velocidade
 
     /**
-    * @brief Set the Engine delay speed.
+    * @brief Configura a velocidade de delay do Engine
     * @param pSDSpeed New Engine delay speed.
     */
     void setDelaySpeed(int pSDSpeed);
 
     /**
-    * @brief Return the Engine delay speed.
+    * @brief Retorna a velocidade de delay do Engine
     */
     int getDelaySpeed();
 
