@@ -21,17 +21,17 @@ class SDCard
 public:
 
     /**
-    * @brief Constructor of a SDCard.
+    * @brief Construtor do SDCard.
     */
     SDCard();
 
     /**
-    * @brief Returns the vector of files names.
+    * @brief Retorna o vetor mFilesNames com os nomes das músicas.
     */
     vector<string> getList();
 
     /**
-    * @brief Create the vector mFilesNames.
+    * @brief Cria o vetor mFilesNames com os nomes das músicas.
     */
     void Makelist();
 
@@ -42,7 +42,7 @@ public:
     void printPosition(std::string pFileName);
 
     /**
-    * @brief Saves the Engines' position on the SD card.
+    * @brief Le o arquivo de texto para obter o fluxo da música
     * @param pNumFile Number of the file.
     * @param pNumStroke Number of the stroke.
     */
@@ -55,28 +55,28 @@ public:
     void writeInFile(vector<int> pEnginePos);
 
     /**
-    * @brief Returns the current targets.
+    * @brief Retorna os alvos atuais
     */
     String getCurrentTarget();
 
     /**
-    * @brief Music speed.
+    * @brief Velocidade da música
     */
     int SD_SPEED;
 
     /**
-    * @brief Music subdivision.
+    * @brief Subdivisão da música
     */
     string SD_SUBDIVISION;
 
     /**
-    * @brief Name of a music author.
+    * @brief Nome do autor
     */
     string authorName;
 
 private:
     /**
-    * @brief Vector of files names.
+    * @brief Vetor com os nomes das músicas
     */
     vector<string> mFilesNames;
 };
