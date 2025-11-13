@@ -29,6 +29,9 @@ int Joystick::get_Y(){
         case 2:
             return 0;
             break;
+        /*
+        - falta de caso default pode bugar o switch e ficar sem retorno.
+        */
     }
 }
 
@@ -36,49 +39,28 @@ bool Joystick::get_button(){
     return !digitalRead(button);
 }
 
-bool Joystick::Y_asButtonUp(){
-    if(get_Y() > 0){
-        return true;
-    }
-    else if(get_Y() <= 0){
-        return false;
-    }
-}
+/*
+- antiga logica das funcoes booleanas Y/X:
 
-/* esses operadores estão redundantes, não?
-if(get_Y() > 0){
-        return true;
-    }
-    else if(get_Y() <= 0){
-        return false;
-    }
+if (n < 0) return true;
+else if (n > 0) return false;
 
-    nao poderia ser diretamente return get_Y() > 0; ?
+- (clean code) podem ser escritas diretamente como return (n > 0).  
+
 */
 
+bool Joystick::Y_asButtonUp(){
+    return (get_Y() > 0);
+}
+
 bool Joystick::Y_asButtonDown(){
-    if(get_Y() < 0){
-        return true;
-    }
-    else if(get_Y() >= 0){
-        return false;
-    }
+    return (get_Y() < 0);
 }
 
 bool Joystick::X_asButtonDown(){
-    if(get_X() > 0){
-        return true;
-    }
-    else if(get_X() <= 0){
-        return false;
-    }
+    return (get_Y() < 0);
 }
 
 bool Joystick::X_asButtonUp(){
-    if(get_X() < 0){
-        return true;
-    }
-    else if(get_X() >= 0){
-        return false;
-    }
+    return (get_X() < 0);
 }
