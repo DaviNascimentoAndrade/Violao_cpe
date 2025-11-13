@@ -29,25 +29,14 @@ int Joystick::get_Y(){
         case 2:
             return 0;
             break;
-        /*
-        - falta de caso default pode bugar o switch e ficar sem retorno.
-        */
+        
+        //caso default?
     }
 }
 
 bool Joystick::get_button(){
     return !digitalRead(button);
 }
-
-/*
-- antiga logica das funcoes booleanas Y/X:
-
-if (n < 0) return true;
-else if (n > 0) return false;
-
-- (clean code) podem ser escritas diretamente como return (n > 0).  
-
-*/
 
 bool Joystick::Y_asButtonUp(){
     return (get_Y() > 0);
@@ -58,7 +47,7 @@ bool Joystick::Y_asButtonDown(){
 }
 
 bool Joystick::X_asButtonDown(){
-    return (get_Y() < 0);
+    return (get_X() > 0);
 }
 
 bool Joystick::X_asButtonUp(){
