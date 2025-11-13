@@ -45,6 +45,17 @@ bool Joystick::Y_asButtonUp(){
     }
 }
 
+/* esses operadores estão redundantes, não?
+if(get_Y() > 0){
+        return true;
+    }
+    else if(get_Y() <= 0){
+        return false;
+    }
+
+    nao poderia ser diretamente return get_Y() > 0; ?
+*/
+
 bool Joystick::Y_asButtonDown(){
     if(get_Y() < 0){
         return true;
