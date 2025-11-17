@@ -67,8 +67,8 @@ public:
 
     /**
     * @brief Toca uma música
-    * @param pStream Music stream.
-    * @param pTune Music tune.
+    * @param pStream Sequência de notas
+    * @param pTune Afinação da música
     */
     void parseFile(std::string pStream, int pTune);
 
