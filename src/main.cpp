@@ -45,15 +45,25 @@ int GLOBAL_SPEED = 90;
 const int GLOBAL_STEPS = 200;
 const int GLOBAL_TARGET = 30;
 
-int buttonUpState;
-int buttonSelectState;
-int buttonDownState;
-int *enginePos;
+int buttonUpState; // @brief armazena a direção do tilt do joystick
+int buttonSelectState; // @brief armazena o aperto do botão do joystick
+int buttonDownState; // @brief armazena a direção do tilt do joystick (direção contrária)
+int *enginePos; // possível variável inutilizada
 int lastStroke = 0;
+int tunePos = 0;
 
-Joystick Joy(JoystickIn,-1, buttonSelect);
+Joystick Joy(JoystickIn,-1, buttonSelect); // Declaração da inst
 
-// bool haltReadingButtons = false;
+EnginesSet guitar;
+
+SDCard sdCard;
+int targetScreen = 1; // @brief Armazena o número da tela que está sendo utilizada pelo usuário
+string defStroke = "";
+
+bool breakLoopFlag = false;
+
+// References the current songLoop. Used to delete it from outside the task
+TaskHandle_t loopHandle = NULL; 
 
 void readingButtons()
 {
@@ -62,11 +72,8 @@ void readingButtons()
   buttonDownState = !(Joy.X_asButtonDown());
 }
 
-EnginesSet guitar;
 
-SDCard sdCard;
-int targetScreen = 1;
-string defStroke = "";
+
 void taskStroke(void *parameter)
 {
   readingButtons();
@@ -75,17 +82,12 @@ void taskStroke(void *parameter)
   // vTaskDelete(NULL);
 }
 
-bool breakLoopFlag = false;
-
-// References the current songLoop. Used to delete it from outside the task
-TaskHandle_t loopHandle = NULL; 
-
 /**
- * @brief Loop that runs on another core and plays the song
+ * @brief Essa função é executada em paralelo, em outro núcleo do processador e manda tocar a música
  */
 void songLoop(void* parameter)
 {
-  // Plays each string once before the song starts
+
   guitar.standardBeat();
 
   guitar.setLastMillis();
@@ -102,71 +104,8 @@ void songLoop(void* parameter)
   vTaskDelete(NULL);
 }
 
-void settings(int *targetScreen)
-{
-  tft.fillScreen(ST7735_BLACK);
-  int goBack = 0;
-  int posSettings = 2;
-  while (goBack == 0)
-  {
-    readingButtons();
-    if (posSettings == 2)
-    {
-      tft.setCursor(0, 0);
-      tft.setTextSize(3);
-      tft.println("Menu:");
-      tft.setTextSize(2);
-      tft.println("");
-      tft.write(16);
-      tft.println("Musicas");
-      tft.println(" Afinar");
-      tft.println(" Resetar");
-    }
-    if (posSettings == 3)
-    {
-      tft.setCursor(0, 0);
-      tft.setTextSize(3);
-      tft.println("Menu:");
-      tft.setTextSize(2);
-      tft.println("");
-      tft.println(" Musicas");
-      tft.write(16);
-      tft.println("Afinar");
-      tft.println(" Resetar");
-    }
-    if (posSettings == 4)
-    {
-      tft.setCursor(0, 0);
-      tft.setTextSize(3);
-      tft.println("Menu:");
-      tft.setTextSize(2);
-      tft.println("");
-      tft.println(" Musicas");
-      tft.println(" Afinar");
-      tft.write(16);
-      tft.println("Resetar");
-    }
 
-    if (buttonUpState == 0 && posSettings != 2)
-    {
-      posSettings--;
-      tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
-      delay(delayButtons);
-    }
-    if (buttonDownState == 0 && posSettings != 4)
-    {
-      posSettings++;
-      tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
-      delay(delayButtons);
-    }
-    if (buttonSelectState == 0)
-    {
-      goBack = 1;
-      delay(delayButtons);
-    }
-  }
-  *targetScreen = posSettings;
-}
+
 void strokes(string firstStroke, string secondStroke, string thirdStroke, int nStrokes)
 {
   tft.fillScreen(ST7735_BLACK);
@@ -350,6 +289,8 @@ void strokes(string firstStroke, string secondStroke, string thirdStroke, int nS
 
 }
 
+
+
 void music(int music)
 {
   // Declarando as variáveis locais
@@ -449,6 +390,184 @@ void music(int music)
   }
 }
 
+
+
+void taskTune(void *parameter) // Tem que estar nessa posição, depois de setEngine e antes de afinar
+{
+  guitar.tune(tunePos);
+  vTaskDelete(NULL);
+}
+
+
+
+void adjustEngine(int *resetPos)
+{
+  int guitarString = *resetPos;
+  string guitarStrings = "EADGBe";
+  char guitarStringChr = guitarStrings[guitarString];
+  tft.fillScreen(ST7735_BLACK);
+  int goBack = 0;
+  int adjustPos = 0;
+  while (goBack == 0)
+  {
+    readingButtons();
+    if (adjustPos == 0)
+    {
+      tft.setCursor(0, 0);
+      tft.setTextSize(2);
+      tft.print("Corda ");
+      tft.print(guitarStringChr);
+      tft.println(":");
+      tft.setTextSize(2);
+      tft.println("");
+      tft.write(16);
+      tft.println("Subir");
+      tft.println(" Descer");
+      tft.println(" Pronto");
+    }
+    if (adjustPos == 1)
+    {
+      tft.setCursor(0, 0);
+      tft.setTextSize(2);
+      tft.print("Corda ");
+      tft.print(guitarStringChr);
+      tft.println(":");
+      tft.setTextSize(2);
+      tft.println("");
+      tft.println(" Subir");
+      tft.write(16);
+      tft.println("Descer");
+      tft.println(" Pronto");
+    }
+    if (adjustPos == 2)
+    {
+      tft.setCursor(0, 0);
+      tft.setTextSize(2);
+      tft.print("Corda ");
+      tft.print(guitarStringChr);
+      tft.println(":");
+      tft.setTextSize(2);
+      tft.println("");
+      tft.println(" Subir");
+      tft.println(" Descer");
+      tft.write(16);
+      tft.println("Pronto");
+    }
+
+    if (buttonUpState == 0 && adjustPos != 0)
+    {
+      adjustPos--;
+      tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
+      delay(delayButtons);
+    }
+    if (buttonDownState == 0 && adjustPos != 2)
+    {
+      adjustPos++;
+      tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
+      delay(delayButtons);
+    }
+    if (buttonSelectState == 0)
+    {
+      if (adjustPos == 0)
+      {
+        guitar.playOneStep(guitarString, 1);
+        guitar.getEnginePos(sdCard);
+      }
+      if (adjustPos == 1)
+      {
+        guitar.playOneStep(guitarString, -1);
+        guitar.getEnginePos(sdCard);
+      }
+      if (adjustPos == 2)
+      {
+        guitar.runHalfTarget(guitarString);
+        tft.fillScreen(ST7735_BLACK);
+        goBack = 1;
+        *resetPos = 1;
+        delay(delayButtons);
+      }
+    }
+  }
+}
+
+
+// FUNÇÕES DO MENU PRINCIPAL
+
+/**
+* @brief Executa a tela de menu inicial
+* @param targetScreen Número da tela que está sendo utilizada pelo usuário
+*/
+void settings(int *targetScreen)
+{
+  tft.fillScreen(ST7735_BLACK);
+  int goBack = 0;
+  int posSettings = 2;
+  while (goBack == 0)
+  {
+    readingButtons();
+    if (posSettings == 2)
+    {
+      tft.setCursor(0, 0);
+      tft.setTextSize(3);
+      tft.println("Menu:");
+      tft.setTextSize(2);
+      tft.println("");
+      tft.write(16);
+      tft.println("Musicas");
+      tft.println(" Afinar");
+      tft.println(" Resetar");
+    }
+    if (posSettings == 3)
+    {
+      tft.setCursor(0, 0);
+      tft.setTextSize(3);
+      tft.println("Menu:");
+      tft.setTextSize(2);
+      tft.println("");
+      tft.println(" Musicas");
+      tft.write(16);
+      tft.println("Afinar");
+      tft.println(" Resetar");
+    }
+    if (posSettings == 4)
+    {
+      tft.setCursor(0, 0);
+      tft.setTextSize(3);
+      tft.println("Menu:");
+      tft.setTextSize(2);
+      tft.println("");
+      tft.println(" Musicas");
+      tft.println(" Afinar");
+      tft.write(16);
+      tft.println("Resetar");
+    }
+
+    if (buttonUpState == 0 && posSettings != 2)
+    {
+      posSettings--;
+      tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
+      delay(delayButtons);
+    }
+    if (buttonDownState == 0 && posSettings != 4)
+    {
+      posSettings++;
+      tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
+      delay(delayButtons);
+    }
+    if (buttonSelectState == 0)
+    {
+      goBack = 1;
+      delay(delayButtons);
+    }
+  }
+  *targetScreen = posSettings;
+}
+
+
+/**
+* @brief Executa a tela seleção de músicas
+* @param targetScreen Número da tela que está sendo utilizada pelo usuário
+*/
 void menu(int *targetScreen)
 {
   // Declarando as variáveis locais
@@ -663,12 +782,11 @@ void menu(int *targetScreen)
   }
 }
 
-int tunePos = 0;
-void taskTune(void *parameter) // Tem que estar nessa posição, depois de setEngine e antes de afinar
-{
-  guitar.tune(tunePos);
-  vTaskDelete(NULL);
-}
+
+/**
+* @brief Executa a tela de afinação
+* @param targetScreen Número da tela que está sendo utilizada pelo usuário
+*/
 void afinar(int *targetScreen)
 {
   enableSwitch = 0;
@@ -822,98 +940,13 @@ void afinar(int *targetScreen)
     guitar.getEnginePos(sdCard);
   }
   enableSwitch = 1;
- }
-
-void adjustEngine(int *resetPos)
-{
-  int guitarString = *resetPos;
-  string guitarStrings = "EADGBe";
-  char guitarStringChr = guitarStrings[guitarString];
-  tft.fillScreen(ST7735_BLACK);
-  int goBack = 0;
-  int adjustPos = 0;
-  while (goBack == 0)
-  {
-    readingButtons();
-    if (adjustPos == 0)
-    {
-      tft.setCursor(0, 0);
-      tft.setTextSize(2);
-      tft.print("Corda ");
-      tft.print(guitarStringChr);
-      tft.println(":");
-      tft.setTextSize(2);
-      tft.println("");
-      tft.write(16);
-      tft.println("Subir");
-      tft.println(" Descer");
-      tft.println(" Pronto");
-    }
-    if (adjustPos == 1)
-    {
-      tft.setCursor(0, 0);
-      tft.setTextSize(2);
-      tft.print("Corda ");
-      tft.print(guitarStringChr);
-      tft.println(":");
-      tft.setTextSize(2);
-      tft.println("");
-      tft.println(" Subir");
-      tft.write(16);
-      tft.println("Descer");
-      tft.println(" Pronto");
-    }
-    if (adjustPos == 2)
-    {
-      tft.setCursor(0, 0);
-      tft.setTextSize(2);
-      tft.print("Corda ");
-      tft.print(guitarStringChr);
-      tft.println(":");
-      tft.setTextSize(2);
-      tft.println("");
-      tft.println(" Subir");
-      tft.println(" Descer");
-      tft.write(16);
-      tft.println("Pronto");
-    }
-
-    if (buttonUpState == 0 && adjustPos != 0)
-    {
-      adjustPos--;
-      tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
-      delay(delayButtons);
-    }
-    if (buttonDownState == 0 && adjustPos != 2)
-    {
-      adjustPos++;
-      tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
-      delay(delayButtons);
-    }
-    if (buttonSelectState == 0)
-    {
-      if (adjustPos == 0)
-      {
-        guitar.playOneStep(guitarString, 1);
-        guitar.getEnginePos(sdCard);
-      }
-      if (adjustPos == 1)
-      {
-        guitar.playOneStep(guitarString, -1);
-        guitar.getEnginePos(sdCard);
-      }
-      if (adjustPos == 2)
-      {
-        guitar.runHalfTarget(guitarString);
-        tft.fillScreen(ST7735_BLACK);
-        goBack = 1;
-        *resetPos = 1;
-        delay(delayButtons);
-      }
-    }
-  }
 }
 
+
+/**
+* @brief Executa a tela de ajuste de motores
+* @param targetScreen Número da tela que está sendo utilizada pelo usuário
+*/
 void resetEngines(int *targetScreen)
 {
   enableSwitch = 0;
@@ -1067,6 +1100,8 @@ void resetEngines(int *targetScreen)
   enableSwitch = 1;
 }
 
+
+// FUNÇÕES OPERACIONAIS DO MICROCONTROLADOR
 void setup()
 {
   // Serial.begin(115200);
@@ -1081,12 +1116,12 @@ void setup()
   guitar.insertMotor('G', 26, 25);
   guitar.insertMotor('B', 22, 1);
   guitar.insertMotor('e', 3, 21);
-// guitar.insertMotor('E', 26, 25);
-//   guitar.insertMotor('A', 3, 21); 
-//   guitar.insertMotor('D', 14, 27);
-//   guitar.insertMotor('G', 22, 1);
-//   guitar.insertMotor('B', 13, 12);
-//   guitar.insertMotor('e', 33, 32);
+  // guitar.insertMotor('E', 26, 25);
+  //   guitar.insertMotor('A', 3, 21); 
+  //   guitar.insertMotor('D', 14, 27);
+  //   guitar.insertMotor('G', 22, 1);
+  //   guitar.insertMotor('B', 13, 12);
+  //   guitar.insertMotor('e', 33, 32);
 
   // pinMode(buttonUp, INPUT_PULLUP);
   // pinMode(buttonSelect, INPUT_PULLUP);
@@ -1120,7 +1155,9 @@ void setup()
   tft.fillScreen(ST7735_BLACK);
 
   readingButtons();
-  }
+}
+
+
 
 void loop()
 {
@@ -1149,6 +1186,8 @@ void loop()
   }
 
 }
+
+
 
 void enableUpdateTask(void *arg){
   while(1){
