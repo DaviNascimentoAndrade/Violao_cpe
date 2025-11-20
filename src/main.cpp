@@ -21,8 +21,8 @@ using namespace std;
 SemaphoreHandle_t serialMutex;
 void enableUpdateTask(void *arg);
 
-vector<string> musicNames;
-int musicNumber;
+vector<string> musicNames; // Vetor com os nomes das músicas
+int musicNumber; // Quantidade de músicas armazenadas
 int j;
 
 #define Motors_Enable 17
@@ -65,6 +65,12 @@ bool breakLoopFlag = false;
 // References the current songLoop. Used to delete it from outside the task
 TaskHandle_t loopHandle = NULL; 
 
+
+// FUNÇÕES DE UTILIDADES
+
+/**
+* @brief Salva os valores atuais do joystick
+*/
 void readingButtons()
 {
   buttonUpState = !(Joy.X_asButtonUp());
@@ -83,8 +89,8 @@ void taskStroke(void *parameter)
 }
 
 /**
- * @brief Essa função é executada em paralelo, em outro núcleo do processador e manda tocar a música
- */
+* @brief Essa função é executada em paralelo, em outro núcleo do processador e manda tocar a música
+*/
 void songLoop(void* parameter)
 {
 
@@ -499,12 +505,16 @@ void adjustEngine(int *resetPos)
 */
 void settings(int *targetScreen)
 {
-  tft.fillScreen(ST7735_BLACK);
-  int goBack = 0;
-  int posSettings = 2;
+  tft.fillScreen(ST7735_BLACK); // Reseta o display
+  int goBack = 0; // Variável de controle do loop
+  int posSettings = 2; // Indica qual opção será escolhida pelo usuário
+
+  // Loop que executa o menu
   while (goBack == 0)
   {
     readingButtons();
+
+    // Gráficos de cada opção, controlados pela variável de escolha
     if (posSettings == 2)
     {
       tft.setCursor(0, 0);
@@ -541,11 +551,12 @@ void settings(int *targetScreen)
       tft.write(16);
       tft.println("Resetar");
     }
-
+    
+    // Lógica de atualização da variável de escolha
     if (buttonUpState == 0 && posSettings != 2)
     {
       posSettings--;
-      tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
+      tft.fillRect(0, 24, 10, 225, ST7735_BLACK); // apaga só a parte do display qeu será atualizada
       delay(delayButtons);
     }
     if (buttonDownState == 0 && posSettings != 4)
@@ -554,13 +565,15 @@ void settings(int *targetScreen)
       tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
       delay(delayButtons);
     }
+
+    // Sai do loop quando a escolha é realizada
     if (buttonSelectState == 0)
     {
       goBack = 1;
       delay(delayButtons);
     }
   }
-  *targetScreen = posSettings;
+  *targetScreen = posSettings; // passa o valor que indica a tela escolhida
 }
 
 
@@ -570,25 +583,32 @@ void settings(int *targetScreen)
 */
 void menu(int *targetScreen)
 {
-  // Declarando as variáveis locais
-  tft.fillScreen(ST7735_BLACK);
-  int goBackCursor = 0;
-  int selectedMusic = 0;
-  int goBack = 0;
-  int menuPos = 1;
-  int screenNumber = musicNumber / 10;
-  int lastMusicScreenNumber = musicNumber % 10;
-  int presentScreen = 0;
+  tft.fillScreen(ST7735_BLACK); // reseta a tela
+  int goBackCursor = 0; // indica que "voltar" foi selecionado no menu
+  int selectedMusic = 0; // Salva o número da música selecionada
+  int goBack = 0; // controla o loop principal
+  int menuPos = 1; // Posição que o 'cursor' está no menu
+  int screenNumber = musicNumber / 10; // Contém o número de "telas" no menu de músicas
+  int lastMusicScreenNumber = musicNumber % 10; // Só é usada essas 2 vezes
+  int presentScreen = 0; // Número da tela atual do menu de musicas
+
+  // lógica pra fazer o número de telas ser 1/10 do número de músicas +1
   if (lastMusicScreenNumber != 0)
   {
     screenNumber += 1;
   }
-  int menuPosMax = musicNumber + screenNumber;
+  int menuPosMax = musicNumber + screenNumber; // posição máxima no menúde músicas
+
+  // Loop principal de execução do menu
   while (goBack == 0)
   {
     readingButtons();
+
+    // A lógica de impressão de telas está separada em 3 casos
+    // Caso da primeira tela
     if (presentScreen == 0)
     {
+      // Com menos de 10 músicas
       if (musicNumber < 10)
       {
         tft.setCursor(0, 0);
@@ -665,6 +685,7 @@ void menu(int *targetScreen)
       }
       delay(10);
     }
+
     if (presentScreen > 0 && presentScreen < screenNumber - 1)
     {
       tft.setCursor(0, 0);
@@ -702,6 +723,7 @@ void menu(int *targetScreen)
         goBackCursor = 0;
       }
     }
+
     if (presentScreen == screenNumber - 1 && screenNumber != 1)
     {
       tft.setCursor(0, 0);
