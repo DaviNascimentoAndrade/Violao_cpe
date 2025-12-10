@@ -35,7 +35,7 @@ int j;
 #define TFT_RST 4
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 
-int delayButtons = 250;
+int delayButtons = 250; // delay do sistema em atuação contínua de botões
 #define buttonSelect 16
 #define JoystickIn 35
 
@@ -89,7 +89,7 @@ void taskStroke(void *parameter)
 }
 
 /**
-* @brief Essa função é executada em paralelo, em outro núcleo do processador e manda tocar a música
+* @brief Essa função é executada em paralelo e manda tocar a música
 */
 void songLoop(void* parameter)
 {
@@ -592,12 +592,12 @@ void menu(int *targetScreen)
   int lastMusicScreenNumber = musicNumber % 10; // Só é usada essas 2 vezes
   int presentScreen = 0; // Número da tela atual do menu de musicas
 
-  // lógica pra fazer o número de telas ser 1/10 do número de músicas +1
+  // lógica pra fazer o número de telas ser 1/10 do número de músicas contando com as opçoes de voltar
   if (lastMusicScreenNumber != 0)
   {
     screenNumber += 1;
   }
-  int menuPosMax = musicNumber + screenNumber; // posição máxima no menúde músicas
+  int menuPosMax = musicNumber + screenNumber; // posição máxima no menú de músicas
 
   // Loop principal de execução do menu
   while (goBack == 0)
@@ -608,161 +608,185 @@ void menu(int *targetScreen)
     // Caso da primeira tela
     if (presentScreen == 0)
     {
-      // Com menos de 10 músicas
+      // Se tem menos de 10 músicas
       if (musicNumber < 10)
       {
-        tft.setCursor(0, 0);
+        tft.setCursor(0, 0); // Imprime o título do menu
         tft.setTextSize(2);
         tft.println("Musicas:");
         tft.setTextSize(1);
         tft.println("");
+
+        // Loop que imprime as músicas (vai até o número máximo de músicas nesse caso)
         for (j = 1; j < musicNumber + 1; j++)
         {
-          if (menuPos == j)
+          if (menuPos == j) // se é a posição do cursor
           {
-            tft.write(16);
+            tft.write(16); // imprime com letra maior
             tft.print(j);
             tft.print("-");
             tft.println(musicNames[j - 1].c_str());
             selectedMusic = j;
           }
-          else
+          else // se não é a posição do cursor
           {
-            tft.print(" ");
+            tft.print(" "); // imprime normal
             tft.print(j);
             tft.print("-");
             tft.println(musicNames[j - 1].c_str());
           }
         }
+        
+        // Se o cursor estiver na posição final do menu
         if (menuPos == menuPosMax)
         {
-          tft.write(16);
+          tft.write(16); // imprime opção de voltar com letra grande
           tft.print("Voltar ");
           goBackCursor = 1;
         }
-        else
+        else // se o cursor não estiver na posição final
         {
-          tft.print(" Voltar ");
+          tft.print(" Voltar "); // imprime opção de voltar com letra pequena
           goBackCursor = 0;
         }
       }
+      
+      // Se tem 10 ou mais músicas
       if (musicNumber > 9)
       {
-        tft.setCursor(0, 0);
+        tft.setCursor(0, 0); // Imprime o título do menu
         tft.setTextSize(2);
         tft.println("Musicas:");
         tft.setTextSize(1);
         tft.println("");
+
+        // Loop que imprime as músicas (vai até 10 nesse caso(cada tela tem 10 músicas))
         for (j = 1; j < 11; j++)
         {
-          if (menuPos == j)
+          if (menuPos == j) // se é a posição do cursor
           {
-            tft.write(16);
+            tft.write(16); // imprime com letra maior
             tft.print(j);
             tft.print("-");
             tft.println(musicNames[j - 1].c_str());
             selectedMusic = j;
           }
-          else
+          else // se não é a posição do cursor
           {
-            tft.print(" ");
+            tft.print(" "); // imprime normal
             tft.print(j);
             tft.print("-");
             tft.println(musicNames[j - 1].c_str());
           }
         }
+        
+        // Se o cursor estiver na décima posição da tela
         if (menuPos % 11 == 0)
         {
-          tft.write(16);
+          tft.write(16); // imprime a opção de voltar com letra grande
           tft.print("Voltar ");
           goBackCursor = 1;
         }
-        else
+        else // se o cursor não estiver na decima posição
         {
-          tft.print(" Voltar ");
+          tft.print(" Voltar "); // imprime o voltar normal
           goBackCursor = 0;
         }
       }
       delay(10);
     }
-
+    
+    // Caso de telas intermediárias
     if (presentScreen > 0 && presentScreen < screenNumber - 1)
     {
-      tft.setCursor(0, 0);
+      tft.setCursor(0, 0); // Imprime o título do menu
       tft.setTextSize(2);
       tft.println("Musicas:");
       tft.setTextSize(1);
       tft.println("");
+      
+      // Loop que imprime as músicas (com cálculos pra percorrer os limites da tela atual)
       for (j = (10 * presentScreen) + 1; j < (10 * (presentScreen + 1)) + 1; j++)
       {
+        // se é a posição do cursor (discontando as opções voltar)
         if ((menuPos - presentScreen) == j)
         {
-          tft.write(16);
+          tft.write(16); // imprime com letra grande
           tft.print(j);
           tft.print("-");
           tft.println(musicNames[j - 1].c_str());
           selectedMusic = j;
         }
-        else
+        else // se não é a posição do cursor
         {
-          tft.print(" ");
+          tft.print(" "); // imprime normal
           tft.print(j);
           tft.print("-");
           tft.println(musicNames[j - 1].c_str());
         }
       }
+      
+      // se o cursor estiver na posição final da tela
       if (menuPos % 11 == 0)
       {
-        tft.write(16);
+        tft.write(16); // Imprime o voltar com letra grande
         tft.print("Voltar ");
         goBackCursor = 1;
       }
-      else
+      else // se não
       {
-        tft.print(" Voltar ");
+        tft.print(" Voltar "); // imprime o voltar normal
         goBackCursor = 0;
       }
     }
 
+    // Caso da última tela, quando tem mais de 1 tela
     if (presentScreen == screenNumber - 1 && screenNumber != 1)
     {
-      tft.setCursor(0, 0);
+      tft.setCursor(0, 0); // Imprime o título do menu
       tft.setTextSize(2);
       tft.println("Musicas:");
       tft.setTextSize(1);
       tft.println("");
+
+      // loop que imprime as músicas
       for (j = (10 * presentScreen) + 1; j < musicNumber + 1; j++)
       {
+        // se é a posição do cursor (discontando os voltar)
         if ((menuPos - presentScreen) == j)
         {
-          tft.write(16);
+          tft.write(16); // imprime com letra grande
           tft.print(j);
           tft.print("-");
           tft.println(musicNames[j - 1].c_str());
           selectedMusic = j;
         }
-        else
+        else // se não
         {
-          tft.print(" ");
+          tft.print(" "); // imprime normal
           tft.print(j);
           tft.print("-");
           tft.println(musicNames[j - 1].c_str());
         }
       }
+      
+      // se o cursor etiver na última posição
       if (menuPos == menuPosMax)
       {
-        tft.write(16);
+        tft.write(16); // imprime o voltar grande
         tft.print("Voltar ");
         goBackCursor = 1;
       }
-      else
+      else // se não
       {
-        tft.print(" Voltar ");
+        tft.print(" Voltar "); // imprime o voltar normal
         goBackCursor = 0;
       }
     }
     delay(10);
 
+    // lógica de atualização das variáveis de controle
+    // manda o cursor para cima
     if (buttonUpState == 0 && menuPos != 1)
     {
       tft.fillRect(0, 20, 5, 100, ST7735_BLACK);
@@ -775,6 +799,7 @@ void menu(int *targetScreen)
       }
       delay(delayButtons);
     }
+    // manda o cursor para baixo
     if (buttonDownState == 0 && menuPos != menuPosMax)
     {
       tft.fillRect(0, 20, 5, 100, ST7735_BLACK);
@@ -787,14 +812,16 @@ void menu(int *targetScreen)
       menuPos++;
       delay(delayButtons);
     }
+
+    // botão pressionado
     if (buttonSelectState == 0)
     {
-      if (goBackCursor == 0)
+      if (goBackCursor == 0) // escolheu uma música
       {
         music(selectedMusic);
         delay(delayButtons);
       }
-      else
+      else // escolheu voltar
       {
         *targetScreen = 1;
         goBack = 1;
@@ -812,12 +839,15 @@ void menu(int *targetScreen)
 void afinar(int *targetScreen)
 {
   enableSwitch = 0;
-  tft.fillScreen(ST7735_BLACK);
-  int goBack = 0;
-  tunePos = 0;
+  tft.fillScreen(ST7735_BLACK); // reseta o display
+  int goBack = 0; // variável de controle do loop
+  tunePos = 0; // variável de posição do cursor
+
+  // loop que implementa o menu de afinação
   while (goBack == 0)
   {
     readingButtons();
+    // Impressão do menu para cada caso de posição do cursor
     if (tunePos == 0)
     {
       tft.setCursor(0, 0);
@@ -932,25 +962,29 @@ void afinar(int *targetScreen)
     }
     delay(10);
 
+    // lógica de atualização das variáveis de controle
+    // Manda cursor para cima
     if (buttonUpState == 0 && tunePos != 0)
     {
       tunePos--;
       tft.fillRect(0, 20, 5, 100, ST7735_BLACK);
       delay(delayButtons);
     }
+    // Manda cursor para baixo
     if (buttonDownState == 0 && tunePos != 6)
     {
       tunePos++;
       tft.fillRect(0, 20, 5, 100, ST7735_BLACK);
       delay(delayButtons);
     }
+    // Botão pressionado
     if (buttonSelectState == 0)
     {
-      if (tunePos != 6)
+      if (tunePos != 6) // escolheu uma corda
       {
         xTaskCreatePinnedToCore(taskTune, "taskTune", 1000, NULL, 1, NULL, 0);
       }
-      else
+      else // escolheu voltar
       {
         guitar.endMusic();
         tft.fillScreen(ST7735_BLACK);
@@ -972,12 +1006,15 @@ void afinar(int *targetScreen)
 void resetEngines(int *targetScreen)
 {
   enableSwitch = 0;
-  tft.fillScreen(ST7735_BLACK);
-  int goBack = 0;
-  int resetPos = 0;
+  tft.fillScreen(ST7735_BLACK); // Reseta o display
+  int goBack = 0; // variável de controle do loop
+  int resetPos = 0; // variável de posição do cursor
+
+  // loop que implementa o menu de ajuste
   while (goBack == 0)
   {
     readingButtons();
+    // Impressão do menu para cada caso de posição do cursor
     if (resetPos == 0)
     {
       tft.setCursor(0, 0);
@@ -1092,25 +1129,29 @@ void resetEngines(int *targetScreen)
     }
     delay(10);
 
+    // Lógica de atualização das variáveis de controle
+    // Manda cursor para cima
     if (buttonUpState == 0 && resetPos != 0)
     {
       resetPos--;
       tft.fillRect(0, 20, 5, 100, ST7735_BLACK);
       delay(delayButtons);
     }
+    // Manda cursor para baixo
     if (buttonDownState == 0 && resetPos != 6)
     {
       resetPos++;
       tft.fillRect(0, 20, 5, 100, ST7735_BLACK);
       delay(delayButtons);
     }
+    // Botão pressionado
     if (buttonSelectState == 0)
     {
-      if (resetPos != 6)
+      if (resetPos != 6) // escolheu uma corda
       {
         adjustEngine(&resetPos);
       }
-      else
+      else // escolheu voltar
       {
         tft.fillScreen(ST7735_BLACK);
         goBack = 1;
