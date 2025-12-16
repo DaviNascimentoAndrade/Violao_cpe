@@ -78,7 +78,11 @@ public:
     * @param pGuitarStrings Guitar strings that will be played.
     */
     void runThrough(mDirection pDirection, std::string pGuitarStrings);
-
+    
+    /**
+    * @brief Toca só uma corda, para fazer afinação
+    * @param pTunePosition posição numérica da corda a ser afinada
+    */
     void tune(int pTunePosition);
 
     /**

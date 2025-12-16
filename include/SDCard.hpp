@@ -42,9 +42,9 @@ public:
     void printPosition(std::string pFileName);
 
     /**
-    * @brief Le o arquivo de texto para obter o fluxo da música
-    * @param pNumFile Number of the file.
-    * @param pNumStroke Number of the stroke.
+    * @brief Lê o arquivo de texto para obter os dados da música a ser tocada
+    * @param pNumFile Posição numérica da música no cartão sd
+    * @param pNumStroke Número da sequência de notas
     */
     string readFile(int pNumFile, char pNumStroke);
 

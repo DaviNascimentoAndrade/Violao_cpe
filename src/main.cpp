@@ -49,7 +49,7 @@ int buttonUpState; // @brief armazena a direção do tilt do joystick
 int buttonSelectState; // @brief armazena o aperto do botão do joystick
 int buttonDownState; // @brief armazena a direção do tilt do joystick (direção contrária)
 int *enginePos; // possível variável inutilizada
-int lastStroke = 0;
+int lastStroke = 0; // variável de controle, fica 0 quando o usuário que parar de tocar
 int tunePos = 0;
 
 Joystick Joy(JoystickIn,-1, buttonSelect); // Declaração da inst
@@ -296,21 +296,22 @@ void strokes(string firstStroke, string secondStroke, string thirdStroke, int nS
 }
 
 
-
+/**
+* @brief Prepara o sistema para tocar uma música e mostra o menu de confirmação
+* @param music posição numérica da música no cartão SD
+*/
 void music(int music)
 {
-  // Declarando as variáveis locais
-  tft.fillScreen(ST7735_BLACK);
+  tft.fillScreen(ST7735_BLACK); // reseta o display
+  // salva as sequências de notas e os dados da música a ser tocada
   string firstStroke = sdCard.readFile(music, '1');
   string secondStroke = sdCard.readFile(music, '2');
   string thirdStroke = sdCard.readFile(music, '3');
 
-  //funcao do SD que seta a velocidade SDCard.SD_SPEED
-  guitar.setEngineSpeed(sdCard);
-  //função do EnginesSet que seta o número de subdivisões SD_SUBDIVISION
-  guitar.setSubdivision(sdCard);
+  guitar.setEngineSpeed(sdCard); // salva velocidade dos motores
+  guitar.setSubdivision(sdCard); // salva subdivisão da música
   
-  int nStrokes = 3;
+  int nStrokes = 3; // Armazena número de seguências a serem tocadas
   if (secondStroke.length() == 0 && thirdStroke.length() == 0)
   {
     nStrokes = 1;
@@ -320,20 +321,24 @@ void music(int music)
     nStrokes = 2;
   }
 
-  int goBack = 0;
-  int goBackMusica = 0;
-  int menuPos = 1;
-  while (goBackMusica == 0)
+  int goBack = 0; // variável de controle do loop do menu de confirmação
+  int goBackMusica = 0; // variável de controle do loop principal
+  int menuPos = 1; // posição do cursor no menu de confirmação
 
+  // Loop principal
+  while (goBackMusica == 0)
   {
+    // Loop que roda o menu de confirmação
     while (goBack == 0)
     {
+      // se acabou de tocar, reseta a posição inicial
       if(lastStroke == 0)
       {
         guitar.endMusic();
       }
 
       readingButtons();
+      // Impreção do menu para cada posição do cursor
       if (menuPos == 1)
       {
         tft.setCursor(0, 0);
@@ -365,18 +370,22 @@ void music(int music)
         tft.println("Voltar");
       }
 
+      // lógica de atualização das variáveis de controle do menu
+      // manda o cursor para cima
       if (buttonUpState == 0 && menuPos != 1)
       {
         menuPos--;
         tft.fillRect(0, 80, 10, 150, ST7735_BLACK);
         delay(delayButtons);
       }
+      // manda o cursor para baixo
       if (buttonDownState == 0 && menuPos != 2)
       {
         menuPos++;
         tft.fillRect(0, 80, 10, 150, ST7735_BLACK);
         delay(delayButtons);
       }
+      // botão pressionado
       if (buttonSelectState == 0)
       {
         goBack = 1;
@@ -384,12 +393,13 @@ void music(int music)
         delay(delayButtons);
       }
     }
-    if (menuPos == 1)
+    // Lógica de escolha do menu de confirmação
+    if (menuPos == 1) // escolheu tocar a musica
     {
       strokes(firstStroke, secondStroke, thirdStroke, nStrokes);
       goBack = 0;
     }
-    if (menuPos == 2)
+    if (menuPos == 2) // escolheu voltar
     {
       goBackMusica = 1;
     }
@@ -397,26 +407,34 @@ void music(int music)
 }
 
 
-
-void taskTune(void *parameter) // Tem que estar nessa posição, depois de setEngine e antes de afinar
+/**
+* @brief Chama a função de afinação do violão
+*/
+void taskTune(void *parameter)
 {
   guitar.tune(tunePos);
   vTaskDelete(NULL);
 }
 
 
-
+/**
+* @brief Função que realiza o ajuste de motores
+* @param resetPos corda do motor que será ajustado
+*/
 void adjustEngine(int *resetPos)
 {
-  int guitarString = *resetPos;
-  string guitarStrings = "EADGBe";
-  char guitarStringChr = guitarStrings[guitarString];
-  tft.fillScreen(ST7735_BLACK);
-  int goBack = 0;
-  int adjustPos = 0;
+  int guitarString = *resetPos; // Armazena a posição numérica da corda
+  string guitarStrings = "EADGBe"; // string com as cordas do violão
+  char guitarStringChr = guitarStrings[guitarString]; // armazena o caractere da corda
+  tft.fillScreen(ST7735_BLACK); // reseta o display
+  int goBack = 0; // variável de controle do loop
+  int adjustPos = 0; // variável de posição do cursor
+
+  // Loop que implementa o menu de ajuste do motor
   while (goBack == 0)
   {
     readingButtons();
+    // lógica que imprime o menu de ajuste para cada posição do cursor
     if (adjustPos == 0)
     {
       tft.setCursor(0, 0);
@@ -460,31 +478,35 @@ void adjustEngine(int *resetPos)
       tft.println("Pronto");
     }
 
+    // Lógica de atualização das variáveis de controle
+    // Manda o cursor para cima
     if (buttonUpState == 0 && adjustPos != 0)
     {
       adjustPos--;
       tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
       delay(delayButtons);
     }
+    // Manda o cursor para baixo
     if (buttonDownState == 0 && adjustPos != 2)
     {
       adjustPos++;
       tft.fillRect(0, 24, 10, 225, ST7735_BLACK);
       delay(delayButtons);
     }
+    // Botão pressionado
     if (buttonSelectState == 0)
     {
-      if (adjustPos == 0)
+      if (adjustPos == 0) // escolheu subir
       {
         guitar.playOneStep(guitarString, 1);
         guitar.getEnginePos(sdCard);
       }
-      if (adjustPos == 1)
+      if (adjustPos == 1) // escolheu descer
       {
         guitar.playOneStep(guitarString, -1);
         guitar.getEnginePos(sdCard);
       }
-      if (adjustPos == 2)
+      if (adjustPos == 2) // escolheu o pronto
       {
         guitar.runHalfTarget(guitarString);
         tft.fillScreen(ST7735_BLACK);
@@ -1008,7 +1030,7 @@ void resetEngines(int *targetScreen)
   enableSwitch = 0;
   tft.fillScreen(ST7735_BLACK); // Reseta o display
   int goBack = 0; // variável de controle do loop
-  int resetPos = 0; // variável de posição do cursor
+  int resetPos = 0; // variável de posição do cursor (qual corda)
 
   // loop que implementa o menu de ajuste
   while (goBack == 0)
