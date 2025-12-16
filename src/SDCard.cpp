@@ -50,23 +50,27 @@ void SDCard::printPosition(std::string pFileName)
 
 string SDCard::readFile(int pNumFile, char pNumStroke)
 {
-  File text = SD.open("/musicas"); // @brief Variável que contem a pasta musicas
+  File text = SD.open("/musicas"); // contem a pasta musicas
   string verify = "";
-  string file = "";
-  int goBack = 0;
+  string file = ""; // Armazena a sequência de notas
+  int goBack = 0; // variável de controle do loop de leitura das notas musicais
+
+  // loop que percorre a pasta musicas até o arquivo da música selecionada
   for (int i = 0; i < pNumFile; i++)
   {
-    File textFile = text.openNextFile();
-    if (i == pNumFile - 1)
+    File textFile = text.openNextFile(); // salva o arquivo da iteração atual
+    if (i == pNumFile - 1) // se for o arquivo da música
     {
-      if (textFile)
+      if (textFile) // confirmação
       {
-        while (textFile.available())
+        while (textFile.available()) // confirmação
         {
-          char ch = textFile.read();
-          if (ch == pNumStroke)
+          char ch = textFile.read(); // armazena o caractere atual e passa adiante
+          // lógicas de leitura pra cada caso de dado
+          if (ch == pNumStroke) // se é a sequência de notas selecionada
           {
             ch = textFile.read();
+            // Lê e armazena as notas
             if (ch == '<')
             {
               while (goBack != 1)
@@ -83,11 +87,12 @@ string SDCard::readFile(int pNumFile, char pNumStroke)
               }
             }
           }
-          else if (ch == 'V')
+          else if (ch == 'V') // se é a velocidade dos motores pra música
           {
             string num = "";
             int vel;
             ch = textFile.read();
+            // Lê e armazena a velocidade na variável pública da classe
             if (ch == '<') {
               for (int i = 0; i < 3; i++)
               {
@@ -102,7 +107,8 @@ string SDCard::readFile(int pNumFile, char pNumStroke)
               break;
             }
           }
-          else if (ch == 'N') {
+          else if (ch == 'N') // se é o nome do autor, lê e armazena na variável pública do sd
+          {
             authorName = "";
             ch = textFile.read();
             if (ch == '<') {
@@ -115,7 +121,7 @@ string SDCard::readFile(int pNumFile, char pNumStroke)
               }
             }
           }
-          else if (ch == 'S')
+          else if (ch == 'S') // se é a subdivisão da música, lê e armazena
           {
             string sub = "";
             int numSubdivision;
@@ -138,6 +144,8 @@ string SDCard::readFile(int pNumFile, char pNumStroke)
             verify = "";
           }
         }
+
+        // retorna a sequência de notas
         return file;
         textFile.close();
       }
