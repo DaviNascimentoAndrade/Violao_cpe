@@ -44,6 +44,8 @@ void EnginesSet::addToenginesToPlay(std::string pGuitarStrings)
 void EnginesSet::playMany()
 {
   //Serial.println("Entrou no playmany!");
+
+
   for (int i = 0; i < mEnginesToPlay.size(); i++) {
     if (mEnginesToPlay[i]->getTarget() > 0) {
       digitalWrite(mEnginesToPlay[i]->getDir(), HIGH);
@@ -52,6 +54,7 @@ void EnginesSet::playMany()
       digitalWrite(mEnginesToPlay[i]->getDir(), LOW);
     }
   }
+
   for (int j = 0; j < mGlobalTargets; j++) {
 
     for (int i = 0; i < mEnginesToPlay.size(); i++) {
@@ -85,15 +88,19 @@ void EnginesSet::parseFile(std::string pStream, int pTune)
 {
   //Serial.println("Entrou parsefile...");
   //Serial.println(pStream.c_str());
-  char guitarString;
+  char guitarString; // armazena a corda atual na sequência
   std::string subStream = "";
-  int forControl = 0;
+  int forControl = 0; // variável de controle do loop que percorre a sequência
   int strControl = 0;
+
+  // Loop principal que percorre a sequência de cordas
   for (forControl; forControl < pStream.size(); forControl++)
   {
     guitarString = pStream[forControl];
-    if (guitarString == ' ')
+    if (guitarString == ' ') // se a corda atual é um espaço
     {
+      
+      // lógica que faz os Engines subirem (s) ou descerem (d) quando o a sequência manda
       if (pStream[forControl - 1] == 's' || pStream[forControl - 1] == 'd')
       {
         int forControlSandD = forControl - 1;
@@ -396,6 +403,7 @@ void EnginesSet::standardBeat()
   // Passa duas vezes pelas cordas para garantir o alinhamento
   enableSwitch = 0;
   
+  // Os Loops percorrem todo o vetor de Engines, usando PlayMany para tocar uma de cada vez a cada .5 sec
   for (auto it = this->mEngines.begin(); it != this->mEngines.end(); ++it)
   {
     this->mEnginesToPlay.push_back(*it);
