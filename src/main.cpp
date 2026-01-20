@@ -58,7 +58,7 @@ EnginesSet guitar;
 
 SDCard sdCard;
 int targetScreen = 1; // @brief Armazena o número da tela que está sendo utilizada pelo usuário
-string defStroke = "";
+string defStroke = ""; // Armazena sequência de cordas que está sendo tocada
 
 bool breakLoopFlag = false;
 
@@ -111,17 +111,26 @@ void songLoop(void* parameter)
 }
 
 
-
+/**
+* @brief Executa enquanto a música está sendo tocada e deixa o usuário escolher qual sequência tocar
+* @param firstStroke primeira sequência
+* @param secondStroke segunda sequência
+* @param thirdStroke terceira sequência
+* @param nStrokes número de sequências
+*/
 void strokes(string firstStroke, string secondStroke, string thirdStroke, int nStrokes)
 {
-  tft.fillScreen(ST7735_BLACK);
-  int returnPlaying = 0;
-  int playingPos = 1;
+  tft.fillScreen(ST7735_BLACK); // Reseta o display
+  int returnPlaying = 0; // variável de controle do loop principal
+  int playingPos = 1; // variável de posição do cursor (qual batida esta sendo tocada)
   guitar.setDelay();
 
+  // Loop que executa o menu de batidas
   while (returnPlaying == 0)
   {
     readingButtons();
+
+    // Gráficos e execução da tarefa que faz o violão tocar, para cada opção.
     if (playingPos == 1)
     {
       tft.setCursor(35, 0);//80,0
@@ -199,9 +208,10 @@ void strokes(string firstStroke, string secondStroke, string thirdStroke, int nS
       }
     }
 
-    guitar.getEnginePos(sdCard);
+    guitar.getEnginePos(sdCard); // escreve última posição dos motores em um arquivo (comentado)
 
-    if (buttonUpState == 0)
+    // lógica de atualização da variável de escolha
+    if (buttonUpState == 0) // Cursor para o anterior
     {
       tft.fillRect(114, 0, 20, 20, ST7735_BLACK);
       if (nStrokes == 3)
@@ -239,7 +249,7 @@ void strokes(string firstStroke, string secondStroke, string thirdStroke, int nS
       }
       delay(delayButtons);
     }
-    if (buttonDownState == 0)
+    if (buttonDownState == 0) // Cursor para o próximo
     {
       tft.fillRect(114, 0, 20, 20, ST7735_BLACK);
       if (nStrokes == 3)
@@ -277,7 +287,7 @@ void strokes(string firstStroke, string secondStroke, string thirdStroke, int nS
       }
       delay(delayButtons);
     }
-    if (buttonSelectState == 0)
+    if (buttonSelectState == 0) // Escolheu parar de tocar
     {
       if (loopHandle != NULL)
       {
@@ -303,7 +313,7 @@ void strokes(string firstStroke, string secondStroke, string thirdStroke, int nS
 void music(int music)
 {
   tft.fillScreen(ST7735_BLACK); // reseta o display
-  // salva as sequências de notas e os dados da música a ser tocada
+  // salva as sequências de cordas e os dados da música a ser tocada
   string firstStroke = sdCard.readFile(music, '1');
   string secondStroke = sdCard.readFile(music, '2');
   string thirdStroke = sdCard.readFile(music, '3');
