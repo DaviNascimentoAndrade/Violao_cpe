@@ -1,14 +1,15 @@
-#pragma once
+#ifndef SCREEN_MANAGER_HPP
+#define SCREEN_MANAGER_HPP
+
 #include "Screen.hpp"
 
 class ScreenManager {
+public:
+  void setScreen(Screen* newScreen);
+  void update();
 
 private:
-    Screen* current = nullptr;
-
-public:
-    ScreenManager();
-    void changeTo(int id);
-    void loop();
-    
+  Screen* current = nullptr;
 };
+
+#endif
