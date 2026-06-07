@@ -1,21 +1,24 @@
-#ifndef MENU_SCREEN_HPP
-#define MENU_SCREEN_HPP
+#ifndef MENU_SCREEN
+#define MENU_SCREEN
 
-#include "Screen.hpp"
-#include <Adafruit_ST7735.h>
+/**
+ * @file MenuScreen.hpp
+ * @brief Tela de menu inicial (Musicas / Afinar / Resetar).
+ * @details Substitui a função settings() do código antigo.
+ * @authors CPE - Consultoria e Projetos Elétricos
+ */
 
-class MenuScreen : public Screen {
+#include "Screen/Screen.hpp"
+
+class MenuScreen : public Screen
+{
 public:
-  MenuScreen(Adafruit_ST7735& tft);
+    MenuScreen(Adafruit_ST7735 &p_tft, Joystick &p_joystick,
+               EnginesSet &p_guitar, SDCard &p_sd_card);
 
-  void onEnter() override;
-  void update() override;
-
-private:
-  Adafruit_ST7735& tft;
-  int pos = 0;
-
-  void draw();
+protected:
+    void drawScreen() override;
+    bool onSelect() override;
 };
 
 #endif

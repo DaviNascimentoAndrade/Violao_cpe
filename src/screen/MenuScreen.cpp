@@ -1,39 +1,54 @@
-#include "MenuScreen.hpp"
+#include "Screen/MenuScreen.hpp"
+#include <Arduino.h>
 
-MenuScreen::MenuScreen(Adafruit_ST7735& tft)
-  : tft(tft) {}
+// Itens do menu, na ordem do cursor (0..2).
+static const char *MENU_ITEMS[] = {"Musicas", "Afinar", "Resetar"};
+static const int MENU_ITEM_COUNT = 3;
 
-void MenuScreen::onEnter() {
-  tft.fillScreen(ST7735_BLACK);
-  draw();
+MenuScreen::MenuScreen(Adafruit_ST7735 &p_tft, Joystick &p_joystick,
+                       EnginesSet &p_guitar, SDCard &p_sd_card)
+    : Screen(p_tft, p_joystick, p_guitar, p_sd_card)
+{
+    this->m_cursor_min = 0;
+    this->m_cursor_max = MENU_ITEM_COUNT - 1;
+    this->m_cursor_pos = 0;
 }
 
-void MenuScreen::update() {
-  readingButtons();
+void MenuScreen::drawScreen()
+{
+    m_tft.setCursor(0, 0);
+    m_tft.setTextSize(3);
+    m_tft.println("Menu:");
+    m_tft.setTextSize(2);
+    m_tft.println("");
 
-  if (buttonUpState == 0 && pos > 0) {
-    pos--;
-    draw();
-    delay(200);
-  }
-
-  if (buttonDownState == 0 && pos < 2) {
-    pos++;
-    draw();
-    delay(200);
-  }
-
-  if (buttonSelectState == 0) {
-    // screenManager.setScreen(&outraTela);
-  }
+    for (int i = 0; i < MENU_ITEM_COUNT; i++)
+    {
+        if (i == this->m_cursor_pos)
+        {
+            m_tft.write(16); // seta do cursor
+        }
+        else
+        {
+            m_tft.print(" ");
+        }
+        m_tft.println(MENU_ITEMS[i]);
+    }
 }
 
-void MenuScreen::draw() {
-  tft.fillScreen(ST7735_BLACK);
-  tft.setCursor(0,0);
-  tft.setTextSize(2);
-
-  tft.println(pos == 0 ? "> Musicas" : "  Musicas");
-  tft.println(pos == 1 ? "> Afinar"  : "  Afinar");
-  tft.println(pos == 2 ? "> Resetar" : "  Resetar");
+bool MenuScreen::onSelect()
+{
+    switch (this->m_cursor_pos)
+    {
+    case 0:
+        this->m_next_screen = SCREEN_MUSIC;
+        break;
+    case 1:
+        this->m_next_screen = SCREEN_TUNE;
+        break;
+    case 2:
+        this->m_next_screen = SCREEN_RESET;
+        break;
+    }
+    return false; // sai do run() e troca de tela
 }
